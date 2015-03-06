@@ -1,0 +1,173 @@
+import re,operator
+from datetime import datetime
+
+book_Browser = open('E:/yaofeng/android_log_2015-1-27_2015_2_18/compiled/Browserhistory.txt')
+book_IncomingSMS = open('E:/yaofeng/android_log_2015-1-27_2015_2_18/compiled/IncomingSMS.txt')
+book_OutgoingSMS = open('E:/yaofeng/android_log_2015-1-27_2015_2_18/compiled/OutgoingSMS.txt')
+book_IncomingCall = open('E:/yaofeng/android_log_2015-1-27_2015_2_18/compiled/IncomingCall.txt')
+book_OutgoingCall = open('E:/yaofeng/android_log_2015-1-27_2015_2_18/compiled/OutgoingCall.txt')
+book_AP = open('E:/yaofeng/android_log_2015-1-27_2015_2_18/compiled/AccessPoint.txt')
+book_output = open('E:/yaofeng/android_log_2015-1-27_2015_2_18/compiled/output.txt', 'w')
+
+AP_score = []
+AP_lat = []
+
+IS_score = []
+IS_lat = {}
+
+OS_score = []
+OS_lat = {}
+
+IC_score = []
+IC_lat = {}
+
+OC_score = []
+OC_lat = {}
+
+B_score = []
+B_lat = {}
+
+result = []
+all_score_result = []
+ecs = {}  # each current score
+
+def get_all_score():
+    add_all = 0
+    for a in ecs:
+        add_all = add_all + int(ecs[a])
+    return add_all
+
+# element_XX[0] is score, element_XX[1] is time
+for line_IC in book_IncomingCall.readlines():
+    data_IC = line_IC.split(';')
+    data_IC.pop(-1)  #remove '\n'
+    element_IC = data_IC[0].split(',')
+    time_IC = datetime.strptime(element_IC[1],"%Y-%m-%d %H:%M:%S")
+    IC_score.append((element_IC[0],time_IC))
+
+for line_OC in book_OutgoingCall.readlines():
+    data_OC = line_OC.split(';')
+    data_OC.pop(-1)  #remove '\n'
+    element_OC = data_OC[0].split(',')
+    time_OC = datetime.strptime(element_OC[1],"%Y-%m-%d %H:%M:%S")
+    OC_score.append((element_OC[0],time_OC))
+
+for line_IS in book_IncomingSMS.readlines():
+    data_IS = line_IS.split(';')
+    data_IS.pop(-1)  #remove '\n'
+    element_IS = data_IS[0].split(',')
+    time_IS = datetime.strptime(element_IS[1],"%Y-%m-%d %H:%M:%S")
+    IS_score.append((element_IS[0],time_IS))
+            
+for line_OS in book_OutgoingSMS.readlines():
+    data_OS = line_OS.split(';')
+    data_OS.pop(-1)  #remove '\n'
+    element_OS = data_OS[0].split(',')
+    time_OS = datetime.strptime(element_OS[1],"%Y-%m-%d %H:%M:%S")
+    OS_score.append((element_OS[0],time_OS))
+                                
+for line_B in book_Browser.readlines():
+    data_B = line_B.split(';')
+    data_B.pop(-1)  #remove '\n'
+    element_B = data_B[0].split(',')
+    time_B = datetime.strptime(element_B[1],"%Y-%m-%d %H:%M:%S")
+    B_score.append((element_B[0],time_B))
+
+for line_AP in book_AP.readlines():
+    data_AP = line_AP.split(';')
+    data_AP.pop(-1)  #remove '\n'
+    element_AP = data_AP[0].split(',')
+    time_AP = datetime.strptime(element_AP[1],"%Y-%m-%d %H:%M:%S")
+    AP_score.append((element_AP[0],time_AP))
+
+i = 0
+j = 0
+k = 0
+h = 0
+n = 0
+m = 0
+
+
+while i<=len(IC_score) and j<=len(OC_score) and k<=len(IS_score) and h<=len(OS_score) and n<=len(B_score) and m<=len(AP_score):
+
+    temp = []
+    
+    #for those who haven't exceed the limit,put them into temp to compare; if exceeds the limit, then dont put
+    if i<len(IC_score):
+        temp.append(IC_score[i])
+
+    if j<len(OC_score):
+        temp.append(OC_score[j])
+
+    if k<len(IS_score):
+        temp.append(IS_score[k])
+
+    if h<len(OS_score):
+        temp.append(OS_score[h])
+
+    if n<len(B_score):
+        temp.append(B_score[n])
+
+    if m<len(AP_score):
+        temp.append(AP_score[m])
+        
+    #do the operation only for those which has not exceed the length of list----------------------------
+    if i!= len(IC_score):
+        if min(b for (a,b) in temp) == IC_score[i][1]:
+            result.append(IC_score[i])
+            ecs['IC']=IC_score[i][0]
+            all_score=get_all_score()
+            all_score_result.append((all_score,IC_score[i][1]))
+            i = i + 1
+
+    if j!= len(OC_score):
+        if min(b for (a,b) in temp) == OC_score[j][1]:
+            result.append(OC_score[j])
+            ecs['OC']=OC_score[j][0]
+            all_score=get_all_score()
+            all_score_result.append((all_score,OC_score[j][1]))
+            j = j + 1
+               
+    if k!= len(IS_score):
+        if min(b for (a,b) in temp) == IS_score[k][1]:
+            result.append(IS_score[k])
+            ecs['IS']=IS_score[k][0]
+            all_score=get_all_score()
+            all_score_result.append((all_score,IS_score[k][1]))
+            k = k + 1
+            
+    if h!= len(OS_score):
+        if min(b for (a,b) in temp) == OS_score[h][1]:
+            result.append(OS_score[h])
+            ecs['OS']=OS_score[h][0]
+            all_score=get_all_score()
+            all_score_result.append((all_score,OS_score[h][1]))
+            h = h + 1
+            
+    if n!= len(B_score):
+        if min(b for (a,b) in temp) == B_score[n][1]:
+            result.append(B_score[n])
+            ecs['B']=B_score[n][0]
+            all_score=get_all_score()
+            all_score_result.append((all_score,B_score[n][1]))
+            n = n + 1
+            
+    if m!= len(AP_score):
+        if min(b for (a,b) in temp) == AP_score[m][1]:
+            result.append(AP_score[m])
+            ecs['AP']=AP_score[m][0]
+            all_score=get_all_score()
+            all_score_result.append((all_score,AP_score[m][1]))
+            m = m + 1
+
+    #when all the list reach the end, stop looping
+    if i==len(IC_score) and j==len(OC_score) and k==len(IS_score) and h==len(OS_score) and n==len(B_score) and m==len(AP_score): 
+        break
+
+print result
+print all_score_result
+
+for (a,b) in all_score_result:
+    book_output.writelines(str(a)+","+b.strftime("%Y-%m-%d %H:%M:%S")+";\n")
+
+book_output.close()
